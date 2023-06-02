@@ -2,30 +2,26 @@ from appwrite.client import Client
 from appwrite.services.storage import Storage
 from appwrite.services.databases import Databases
 from appwrite.input_file import InputFile
-from appwrite.id import ID
+from selenium import webdriver
 from datetime import datetime, timezone
 import io
-import os
 import uuid
 import asyncio
-from pyppeteer import launch
+from chrome_options import get_chrome_options
 
 
-root_path = os.path.dirname(os.path.abspath(__file__))
-chrome_executable_path = os.path.join(root_path, 'chrome-linux', 'chrome')
-
+chrome_options = get_chrome_options()
 # Override io class to have len function
 class BytesIOWithLen(io.BytesIO):
     def __len__(self):
         return self.getbuffer().nbytes
  
-async def take_screenshot(url):
-    browser = await launch(headless=True,executablePath=chrome_executable_path)
-    page = await browser.newPage()
-    await page.goto(url)
-    await page.setViewport({'width': 1920, 'height': 1080})
-    screenshot_bytes = await page.screenshot()
-    await browser.close()
+async def take_screenshot(req,url):
+    browserless_url = f"https://{req.variables.get('browserless_api_key')}@chrome.browserless.io/webdriver"
+    driver = webdriver.Remote(command_executor=browserless_url,desired_capabilities=chrome_options.to_capabilities(),options=chrome_options)
+    driver.get(url)
+    screenshot_bytes = driver.get_screenshot_as_png()
+    driver.quit()
     return screenshot_bytes
  
 async def capture_screenshots(websites,screenshot_data):
