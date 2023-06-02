@@ -24,9 +24,9 @@ async def take_screenshot(req,url):
     driver.quit()
     return screenshot_bytes
  
-async def capture_screenshots(websites,screenshot_data):
+async def capture_screenshots(req,websites,screenshot_data):
     for website in websites:
-        screenshot_bytes = await take_screenshot(website['url'])
+        screenshot_bytes = await take_screenshot(req,website['url'])
         screenshot_data.append({'title': website['title'], 'bytes': screenshot_bytes})
     return screenshot_data
           
@@ -52,7 +52,7 @@ def main(req,res):
             }
         ]
         screenshot_data = []
-        asyncio.new_event_loop().run_until_complete(capture_screenshots(websites,screenshot_data))
+        asyncio.new_event_loop().run_until_complete(capture_screenshots(req,websites,screenshot_data))
         # Initialize Appwrite client
         client = Client()
         client.set_endpoint('https://cloud.appwrite.io/v1') 
