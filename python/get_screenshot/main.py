@@ -21,14 +21,17 @@ def chrome_options(req):
     chrome_options.set_capability('browserless:token', req.variables.get('browserless_api_key'))
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--window-size=1920,1080")
+    chrome_options.add_argument("--window-size=1920,0")
     return chrome_options
 
 def take_screenshot(req,url):
     browserless_url = "https://chrome.browserless.io/webdriver"
     driver = webdriver.Remote(command_executor=browserless_url,options=chrome_options(req))
-    driver.maximize_window()
     driver.get(url)
+     # Get the page dimensions
+    width = driver.execute_script('return document.body.parentNode.scrollWidth') 
+    height = driver.execute_script('return document.body.parentNode.scrollHeight')
+    driver.set_window_size(width,height)
     screenshot_bytes = driver.get_screenshot_as_png()
     driver.quit()
     return screenshot_bytes
